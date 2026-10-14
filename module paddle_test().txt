@@ -1,0 +1,65 @@
+module paddle_test(clk,reset,up_p1,down_p1,up_p2,down_p2,rows,cols);
+
+	input clk,reset,up_p1,up_p2,down_p1,down_p2;
+	output reg [7:0] rows, cols;
+	reg [2:0] p1_pos, p2_pos;
+	
+	//Clock
+	wire clk_new, counter0, counter1;
+	clock_divider clk_gen(clk,clk_new, counter0, counter1);
+	
+	initial begin
+		
+		rows = 8'b00000000;
+		cols = 8'b10000001;
+		p1_pos <= 2;
+		p2_pos <= 2;
+		
+		rows[p1_pos]=1;
+		rows[p1_pos+1]=1;
+		rows[p1_pos+2]=1;
+		rows[p2_pos]=1;
+		rows[p2_pos+1]=1;
+		rows[p2_pos+2]=1;
+	end
+	
+	always@(posedge clk_new or posedge reset)begin
+		
+		if(reset)begin
+			p1_pos <= 2;
+			p2_pos <= 2;
+		end
+		else begin
+			if(clk_new == 1)begin
+			
+				if(~up_p1 && p1_pos>0) //using negative pulse
+					p1_pos<=p1_pos-1;
+				if(down_p1 && p1_pos<5)
+					p1_pos<=p1_pos+1;
+				rows = 8'b00000000;
+				cols = 8'b10000000;
+			
+				rows[p1_pos]=1;
+				rows[p1_pos+1]=1;
+				rows[p1_pos+2]=1;
+				
+				cols = 8'b10000001;
+			end
+			else begin
+		
+				if(~up_p2 && p2_pos>0) //using negative pulse
+					p2_pos<=p2_pos-1;
+				if(down_p2 && p2_pos<5)
+					p2_pos<=p2_pos+1;
+				
+				rows = 8'b00000000;
+				cols = 8'b00000001;
+				
+				rows[p2_pos]=1;
+				rows[p2_pos+1]=1;
+				rows[p2_pos+2]=1;
+				cols = 8'b10000001;
+			end
+		end	
+	end					
+endmodule

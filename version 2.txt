@@ -1,0 +1,109 @@
+module Open(
+    input clk,           // System clock
+    input reset,         // Reset signal assign pulse
+    input switch1,       // Switch 1 for "OPEN"
+    output reg [7:0] row,    // Rows of LED matrix
+    output reg [7:0] col,     // Columns of LED matrix
+);
+
+// Declare state variables
+reg [7:0] display_row_memory [0:31];  // Memory for storing display data (text: "OPEN")
+reg [7:0] display_col_memory [0:7];
+reg [4:0] scroll_counter;         // Counter for scrolling text
+reg [20:0] count;
+reg [2:0] col_counter;
+reg [15:0] clock_counter;
+reg clkd
+
+// Initialize the display memory with "OPEN" text pattern (binary representation of each character)
+initial begin
+    col_counter <= 0;
+    clock_counter <=0;
+    scroll_counter <=0;
+    count <=0;    
+    clkd <=0;
+    
+    display_col_memory [0] = 8'b10000000;
+    display_col_memory [1] = 8'b01000000; 
+    display_col_memory [2] = 8'b00100000;
+    display_col_memory [3] = 8'b00010000;
+    display_col_memory [4] = 8'b00001000;
+    display_col_memory [5] = 8'b00000100;
+    display_col_memory [6] = 8'b00000010; 
+    display_col_memory [7] = 8'b00000001;
+        
+    display_row_memory[0]  = 8'b00000000;  // O
+    display_row_memory[1]  = 8'b00111100;
+    display_row_memory[2]  = 8'b01111110;
+    display_row_memory[3]  = 8'b11000011;
+    display_row_memory[4]  = 8'b11000011;
+    display_row_memory[5]  = 8'b11111110;
+    display_row_memory[6]  = 8'b00111100;
+    display_row_memory[7]  = 8'b00000000;
+
+    display_row_memory[8]  = 8'b00000000;  // P
+    display_row_memory[9]  = 8'b11111111;
+    display_row_memory[10] = 8'b11111111;
+    display_row_memory[11] = 8'b10010000;
+    display_row_memory[12] = 8'b10010000;
+    display_row_memory[13] = 8'b11110000;
+    display_row_memory[14] = 8'b01100000;
+    display_row_memory[15] = 8'b00000000;
+
+    display_row_memory[16] = 8'b00000000;  // E
+    display_row_memory[17] = 8'b11111111;
+    display_row_memory[18] = 8'b11111111;
+    display_row_memory[19] = 8'b11011011;
+    display_row_memory[20] = 8'b11011011;
+    display_row_memory[21] = 8'b11011011;
+    display_row_memory[22] = 8'b11011011;
+    display_row_memory[23] = 8'b00000000;
+
+    display_row_memory[24] = 8'b11111111;  // N
+    display_row_memory[25] = 8'b11111111;
+    display_row_memory[26] = 8'b11000000;
+    display_row_memory[27] = 8'b00110000;
+    display_row_memory[28] = 8'b00001100;
+    display_row_memory[29] = 8'b00000011;
+    display_row_memory[30] = 8'b11111111;
+    display_row_memory[31] = 8'b11111111;
+end
+
+always @(posedge clk) begin
+       count <= count+1;
+       if (count >=10000) begin
+		count <=0;
+		clkd = ~clkd;
+       end
+end
+
+
+
+always @(posedge clkd or posedge reset) begin
+    if (reset) begin
+        col_counter <= 0;
+        clock_counter <=0;
+        scroll_counter <=0;
+    end else if (switch1) begin
+        col_counter <= col_counter + 1;
+        clock_counter <= clock_counter + 1;
+        if (col_counter >= 8)  // Loop the text
+            col_counter <= 0;
+        if (clock_counter >= 1000) begin //clk=1k
+            clock_counter <=0;
+            scroll_counter <= scroll_counter + 1;
+            end
+        if (scroll_counter >= 32)
+            scroll_counter <= 0;
+    end
+end
+
+
+// LED Matrix control logic
+always @(posedge clkd) begin
+    // Set row and column data based on scrolling counter(fade effect)
+    col <= display_col_memory[col_counter];   // Get column data for current scroll position
+    row <= display_row_memory[col_counter+scroll_counter];
+end
+
+endmodule

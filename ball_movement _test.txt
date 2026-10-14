@@ -1,0 +1,91 @@
+module ball_movement_test(clk,reset,rows,cols);
+
+	input clk,reset;
+	//Dot matrix
+	output reg [7:0] rows, cols;
+	
+	//Game variables
+	reg[2:0] ball_x,ball_y;
+	reg [1:0] ball_speed_x, ball_speed_y;
+	
+	//Clock
+	wire clk_new, counter0, counter1;
+	clock_divider clk_gen(clk,clk_new, counter0, counter1);
+	
+	initial begin
+	rows = 8'b00000000;
+	cols = 8'b00000000;
+	
+	ball_x = 4;
+	ball_y = 4;
+	
+	ball_speed_x = 1;
+	ball_speed_y = 0;
+	
+	rows[ball_x]=1;
+	cols[ball_y]=1;
+	
+	end
+	
+	always@(posedge clk_new or posedge reset)
+		
+		if(reset)
+		begin
+			ball_x <= 4;
+			ball_y <= 4;
+			ball_speed_x <= 1;
+			ball_speed_y <= 1;
+		end
+		
+		else
+		begin
+			if (ball_speed_x == 1 && ball_x < 7)begin
+				ball_x <= ball_x + 1;
+			end
+			
+			else if (ball_speed_x == 2 && ball_x > 0)begin
+				ball_x <= ball_x - 1;
+			end
+			
+//			else if (ball_speed_x ==0 && ball_x < 7)begin
+//				ball_x <= ball_x; 
+//			end
+			
+			if (ball_speed_y == 1 && ball_y < 7 )begin
+				ball_y <= ball_y + 1;
+			end
+			else if (ball_speed_y == 2 && ball_y > 0)begin
+				ball_y <= ball_y - 1;
+			end
+			
+		
+			//ball_x <= ball_x + (ball_speed_x ? 1 : -1);
+			//ball_y <= ball_y + (ball_speed_y ? 1 : -1);
+			
+			if (ball_x == 7)begin
+				ball_speed_x <= 2;
+				
+			end
+//			
+			else if (ball_x == 0)begin
+				ball_speed_x <= 1;
+			end	
+//			
+			if (ball_y == 7)begin 
+				ball_speed_y <= 2;
+			end
+//			
+			else if (ball_y == 0)begin 
+				ball_speed_y <= 1;
+			end
+				
+			rows = 8'b00000000;
+			cols = 8'b00000000;
+			
+			rows[ball_x] = 1;
+			cols[ball_y] = 1;
+	    end
+
+endmodule
+		
+									
